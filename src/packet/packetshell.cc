@@ -22,9 +22,11 @@ using namespace std;
 using namespace PollerShortNames;
 
 template <class FerryQueueType>
-PacketShell<FerryQueueType>::PacketShell( const std::string & device_prefix, char ** const user_environment, const bool passthrough_until_signal )
+PacketShell<FerryQueueType>::PacketShell( const std::string & device_prefix, char ** const user_environment, const bool passthrough_until_signal, const char * egress, const char * ingress )
     : user_environment_( user_environment ),
-      egress_ingress( two_unassigned_addresses( get_mahimahi_base() ) ),
+      egress_ingress( (egress && ingress) ? 
+        std::make_pair(Address(egress, 0), Address(ingress, 0)) : 
+        two_unassigned_addresses(get_mahimahi_base()) ),
       nameserver_( first_nameserver() ),
       egress_tun_( device_prefix + "-" + to_string( getpid() ) , egress_addr(), ingress_addr() ),
       dns_outside_( egress_addr(), nameserver_, nameserver_ ),

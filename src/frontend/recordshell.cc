@@ -58,8 +58,17 @@ int main( int argc, char *argv[] )
 
         /* set egress and ingress ip addresses */
         Address egress_addr, ingress_addr;
-        tie( egress_addr, ingress_addr ) = two_unassigned_addresses();
+        // const char * const egress_ip = getenv( "EGRESS_IP" );
+        // const char * const ingress_ip = getenv( "INGRESS_IP" );
 
+        // if ( egress_ip != nullptr && ingress_ip != nullptr ) {
+        //     egress_addr = Address(egress_ip,0);
+        //     ingress_addr = Address(ingress_ip,0);
+        // }
+        // else {
+        //     tie( egress_addr, ingress_addr ) = two_unassigned_addresses();
+        // }
+        tie( egress_addr, ingress_addr ) = two_unassigned_addresses();
         /* make pair of devices */
         string egress_name = "veth-" + to_string( getpid() ), ingress_name = "veth-i" + to_string( getpid() );
         VirtualEthernetPair veth_devices( egress_name, ingress_name );

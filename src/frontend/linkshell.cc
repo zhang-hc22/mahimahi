@@ -23,6 +23,7 @@ void usage_error( const string & program_name )
     cerr << "          --meter-all" << endl;
     cerr << "          --uplink-queue=QUEUE_TYPE --downlink-queue=QUEUE_TYPE" << endl;
     cerr << "          --uplink-queue-args=QUEUE_ARGS --downlink-queue-args=QUEUE_ARGS" << endl;
+    cerr << "          --egress=IP_ADDRESS --ingress=IP_ADDRESS" << endl; 
     cerr << endl;
     cerr << "          QUEUE_TYPE = infinite | droptail | drophead | codel | pie" << endl;
     cerr << "          QUEUE_ARGS = \"NAME=NUMBER[, NAME2=NUMBER2, ...]\"" << endl;
@@ -88,20 +89,23 @@ int main( int argc, char *argv[] )
             command_line += string( " " ) + shell_quote( argv[ i ] );
         }
 
+        // 新增 --egress 和 --ingress 选项
         const option command_line_options[] = {
             { "uplink-log",           required_argument, nullptr, 'u' },
             { "downlink-log",         required_argument, nullptr, 'd' },
-            { "once",                       no_argument, nullptr, 'o' },
-            { "meter-uplink",               no_argument, nullptr, 'm' },
-            { "meter-downlink",             no_argument, nullptr, 'n' },
-            { "meter-uplink-delay",         no_argument, nullptr, 'x' },
-            { "meter-downlink-delay",       no_argument, nullptr, 'y' },
-            { "meter-all",                  no_argument, nullptr, 'z' },
+            { "once",                 no_argument,       nullptr, 'o' },
+            { "meter-uplink",         no_argument,       nullptr, 'm' },
+            { "meter-downlink",       no_argument,       nullptr, 'n' },
+            { "meter-uplink-delay",   no_argument,       nullptr, 'x' },
+            { "meter-downlink-delay", no_argument,       nullptr, 'y' },
+            { "meter-all",            no_argument,       nullptr, 'z' },
             { "uplink-queue",         required_argument, nullptr, 'q' },
             { "downlink-queue",       required_argument, nullptr, 'w' },
             { "uplink-queue-args",    required_argument, nullptr, 'a' },
             { "downlink-queue-args",  required_argument, nullptr, 'b' },
-            { 0,                                      0, nullptr, 0 }
+            { "egress",               required_argument, nullptr, 'e' }, 
+            { "ingress",              required_argument, nullptr, 'i' }, 
+            { 0,                      0,                 nullptr, 0 }
         };
 
         string uplink_logfile, downlink_logfile;
@@ -110,6 +114,7 @@ int main( int argc, char *argv[] )
         bool meter_uplink_delay = false, meter_downlink_delay = false;
         string uplink_queue_type = "infinite", downlink_queue_type = "infinite",
                uplink_queue_args, downlink_queue_args;
+        string egress_ip, ingress_ip; 
 
         while ( true ) {
             const int opt = getopt_long( argc, argv, "u:d:", command_line_options, nullptr );
@@ -156,6 +161,12 @@ int main( int argc, char *argv[] )
             case 'b':
                 downlink_queue_args = optarg;
                 break;
+            case 'e':
+                egress_ip = optarg;
+                break;
+            case 'i': 
+                ingress_ip = optarg;
+                break;
             case '?':
                 usage_error( argv[ 0 ] );
                 break;
@@ -181,7 +192,9 @@ int main( int argc, char *argv[] )
             }
         }
 
-        PacketShell<LinkQueue> link_shell_app( "link", user_environment, passthrough_until_signal );
+        PacketShell<LinkQueue> link_shell_app( "link", user_environment, passthrough_until_signal,
+                                             egress_ip.empty() ? nullptr : egress_ip.c_str(),
+                                             ingress_ip.empty() ? nullptr : ingress_ip.c_str() );
 
         link_shell_app.start_uplink( "[link] ", command,
                                      "Uplink", uplink_filename, uplink_logfile, repeat, meter_uplink, meter_uplink_delay,

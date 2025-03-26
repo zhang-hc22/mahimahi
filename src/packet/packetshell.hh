@@ -45,7 +45,7 @@ private:
     Address get_mahimahi_base( void ) const;
 
 public:
-    PacketShell( const std::string & device_prefix, char ** const user_environment, const bool passthrough_until_signal );
+    PacketShell( const std::string & device_prefix, char ** const user_environment, const bool passthrough_until_signal, const char * egress = nullptr, const char * ingress = nullptr);
 
     template <typename... Targs>
     void start_uplink( const std::string & shell_prefix,

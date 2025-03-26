@@ -136,4 +136,5 @@ std::pair< Address, Address > two_unassigned_addresses( const Address & avoid )
     auto two = interfaces.first_unassigned_address( one.second + 1 );
 
     return make_pair( one.first, two.first );
+
 }
